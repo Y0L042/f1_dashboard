@@ -7,6 +7,8 @@ import 'dart:math' as math;
 
 import 'package:f1_dashboard/pages/constructorPage.dart';
 
+String renderServerURL = 'https://f1stats-flask-server.onrender.com';
+
 void main() => runApp(MaterialApp(
   home: Home(),
 ));
