@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_core/firebase_core.dart'; // Import firebase_core
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -10,10 +11,14 @@ import 'package:f1_dashboard/pages/constructorPage.dart';
 import 'package:f1_dashboard/pages/login_page.dart';
 import 'package:f1_dashboard/pages/dashboard.dart';
 import 'package:f1_dashboard/pages/user_profile_page.dart';
+import 'package:f1_dashboard/pages/something_went_wrong.dart';
+import 'package:f1_dashboard/pages/loading.dart';
+
 
 String renderServerURL = 'https://f1stats-flask-server.onrender.com';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure widgets binding
   runApp(F1StatsApp());
 }
 
@@ -24,6 +29,7 @@ class F1StatsApp extends StatefulWidget {
 
 class _F1StatsAppState extends State<F1StatsApp> {
   bool isLoggedIn = false; // Assume the user is not logged in initially
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp(); // Initialize Firebase
 
   @override
   void initState() {
@@ -43,17 +49,31 @@ class _F1StatsAppState extends State<F1StatsApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'F1 Stats App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      // Define the routes and link them to the respective Dart files
-      initialRoute: isLoggedIn ? '/dashboard' : '/',
-      routes: {
-        '/': (context) => LoginPage(),
-        '/dashboard': (context) => Dashboard(),
-        '/profile': (context) => UserProfilePage(),
+    return FutureBuilder(
+      // Replace your MaterialApp with FutureBuilder
+      future: _initialization,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return MaterialApp(
+            title: 'F1 Stats App',
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+            // Define the routes and link them to the respective Dart files
+            initialRoute: isLoggedIn ? '/dashboard' : '/',
+            routes: {
+              '/': (context) => LoginPage(),
+              '/dashboard': (context) => Dashboard(),
+              '/profile': (context) => UserProfilePage(),
+            },
+          );
+        }
+
+        if (snapshot.hasError) {
+          return SomethingWentWrong(); // You need to define this widget
+        }
+
+        return Loading(); // You need to define this widget
       },
     );
   }
